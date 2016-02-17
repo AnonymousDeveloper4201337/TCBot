@@ -20,8 +20,8 @@ import time
 from colorama import init, deinit, Fore, reinit
 from lxml import html
 
-from RbxAPI import getpass, getnum, GetValidation, TC_URL, GetCash, GetRate, Login, ListAccounts, LoadAccounts, \
-    IsTradeActive, pause, Session, GetBuxToTixEstimate, GetTixToBuxEstimate, DebugLog
+from RbxAPI import GetPass, GetNum, GetValidation, TC_URL, GetCash, GetRate, Login, ListAccounts, LoadAccounts, \
+    IsTradeActive, Pause, Session, GetBuxToTixEstimate, GetTixToBuxEstimate, DebugLog
 from RbxAPI.errors import NoAccountsError, SetupError
 
 if getattr(sys, 'frozen', False):
@@ -246,7 +246,6 @@ def setup():
     init(convert=True)
     print(Fore.WHITE + '   1: Log In?')
     print(Fore.WHITE + '   2: Load Account?')
-    GetNum = getnum
     choice = GetNum()
     if not choice:
         raise SetupError()
@@ -255,7 +254,7 @@ def setup():
         while True:
             user = input('Username: ')
             if user:
-                Login(user, getpass())
+                Login(user, GetPass())
                 break
     elif choice == 2:
         accounts = ListAccounts()
@@ -292,7 +291,7 @@ def closing():
     :rtype:
     """
     deinit()
-    pause()
+    Pause()
 
 
 if __name__ == '__main__':

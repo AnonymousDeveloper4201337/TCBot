@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Project: ROBLOX
+Project: RbxAPI
 File: inputPass.py
 Author: Diana
 Creation Date: 8/18/2014
 
 Custom implmentation of GetPass module to show asterks when you type your password instead of nothing.
 
-It DOES NOT WORK on linux. I can't understand the linux code magic so i didnt try.
-
-Copyright (C) 2015  Diana Land
+Copyright (C) 2016  Diana Land
 Read LICENSE for more information
 """
 import sys
@@ -21,7 +19,7 @@ from RbxAPI import errors
 __all__ = ["getpass", "getnum", "pause"]
 
 
-def win_getpass(prompt='Password: ', stream=None):
+def WinGetPass(prompt='Password: ', stream=None):
     """
     Prompt for password with echo off, using Windows getch().
 
@@ -29,7 +27,7 @@ def win_getpass(prompt='Password: ', stream=None):
     :param prompt: What to display/prompt to the user.
     """
     if sys.stdin is not sys.__stdin__:
-        return fallback_getpass(prompt, stream)
+        return FallbackGetPass(prompt, stream)
     import msvcrt
     for c in prompt:
         msvcrt.putwch(c)
@@ -86,7 +84,7 @@ def unix_getpass(prompt='Password: ', stream=None):
                 tcsetattr_flags |= termios.TCSASOFT
             try:
                 termios.tcsetattr(fd, tcsetattr_flags, new)
-                passwd = _raw_input(prompt, stream, input=input)
+                passwd = _RawInput(prompt, stream, inputt=input)
             finally:
                 termios.tcsetattr(fd, tcsetattr_flags, old)
                 stream.flush()  # issue7208
@@ -103,7 +101,7 @@ def unix_getpass(prompt='Password: ', stream=None):
     stream.write('\n')
     return passwd
     
-def win_getNum(prompt='> ', choices=2, stream=None):
+def WinGetNum(prompt='> ', choices=2, stream=None):
     """
     Select number choices using prompt, up to a max of choices.
 
@@ -177,7 +175,7 @@ def unix_getnum(prompt='> ', choices=2, stream=None):
                 tcsetattr_flags |= termios.TCSASOFT
             try:
                 termios.tcsetattr(fd, tcsetattr_flags, new)
-                num = _raw_input(prompt, stream, input=input)
+                num = _RawInput(prompt, stream, inputt=input)
             finally:
                 termios.tcsetattr(fd, tcsetattr_flags, old)
                 stream.flush()  # issue7208
@@ -195,7 +193,7 @@ def unix_getnum(prompt='> ', choices=2, stream=None):
     except ValueError:
         return None
 
-def win_pause():
+def WinPause():
     """
     Stops the program from exiting immediatly.
     """
@@ -220,7 +218,7 @@ def unix_pause():
     except:
         pass
   		
-def fallback_getpass(prompt='Password: ', stream=None):
+def fallbackGetPass(prompt='Password: ', stream=None):
     """
 
     :param prompt: Prompt for user
@@ -231,15 +229,15 @@ def fallback_getpass(prompt='Password: ', stream=None):
     if not stream:
         stream = sys.stderr
     print("Warning: Password input may be echoed.", file=stream)
-    return _raw_input(prompt, stream)
+    return _RawInput(prompt, stream)
 
 
-def _raw_input(prompt="", stream=None, input=None):
+def _RawInput(prompt="", stream=None, inputt=None):
     # This doesn't save the string in the GNU readline history.
     if not stream:
         stream = sys.stderr
-    if not input:
-        input = sys.stdin
+    if not inputt:
+        inputt = sys.stdin
     prompt = str(prompt)
     if prompt:
         try:
@@ -251,7 +249,7 @@ def _raw_input(prompt="", stream=None, input=None):
             stream.write(prompt)
         stream.flush()
     # NOTE: The Python C API calls flockfile() (and unlock) during readline.
-    line = input.readline()
+    line = inputt.readline()
     if not line:
         raise EOFError
     if line[-1] == '\n':
@@ -271,12 +269,12 @@ except (ImportError, AttributeError):
         # noinspection PyUnresolvedReferences
         import msvcrt
     except ImportError:
-        getpass = fallback_getpass
+        GetPass = FallbackGetPass
     else:
-        getpass = win_getpass
-        getnum = win_getNum
-        pause = win_pause
+        GetPass = WinGetPass
+        GetNum = WinGetNum
+        Pause = WinPause
 else:
-    getpass = unix_getpass
-    getnum = unix_getnum
-    pause = unix_pause
+    GetPass = unix_getpass
+    GetNum = unix_getnum
+    Pause = unix_pause
