@@ -1,24 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Project: RbxAPI
+Project: ROBLOX
 File: inputPass.py
 Author: Diana
 Creation Date: 8/18/2014
 
 Custom implmentation of GetPass module to show asterks when you type your password instead of nothing.
 
-Copyright (C) 2016  Diana Land
+It DOES NOT WORK on linux. I can't understand the linux code magic so i didnt try.
+
+Copyright (C) 2015  Diana Land
 Read LICENSE for more information
 """
 import sys
 import warnings
+import os
 
 from RbxAPI import errors
 
-__all__ = ["GetPass", "GetNum", "WinPause"]
+__all__ = ["getpass", "getnum", "pause"]
 
 
-def WinGetPass(prompt='Password: ', stream=None):
+def win_getpass(prompt='Password: ', stream=None):
     """
     Prompt for password with echo off, using Windows getch().
 
@@ -26,7 +29,7 @@ def WinGetPass(prompt='Password: ', stream=None):
     :param prompt: What to display/prompt to the user.
     """
     if sys.stdin is not sys.__stdin__:
-        return FallbackGetPass(prompt, stream)
+        return fallback_getpass(prompt, stream)
     import msvcrt
     for c in prompt:
         msvcrt.putwch(c)
@@ -52,12 +55,61 @@ def WinGetPass(prompt='Password: ', stream=None):
     return pw
 
 
-def WinGetNum(prompt='> ', choices=2):
+def unix_getpass(prompt='Password: ', stream=None):
+    fd = None
+    tty = None
+    try:
+        # Always try reading and writing directly on the tty first.
+        fd = os.open('/dev/tty', os.O_RDWR|os.O_NOCTTY)
+        tty = os.fdopen(fd, 'w+', 1)
+        input = tty
+        if not stream:
+            stream = tty
+    except EnvironmentError as e:
+        # If that fails, see if stdin can be controlled.
+        try:
+            fd = sys.stdin.fileno()
+        except (AttributeError, ValueError):
+            passwd = fallback_getpass(prompt, stream)
+        input = sys.stdin
+        if not stream:
+            stream = sys.stderr
+
+    if fd is not None:
+        passwd = None
+        try:
+            old = termios.tcgetattr(fd)     # a copy to save
+            new = old[:]
+            new[3] &= ~(termios.ECHO|termios.ISIG)  # 3 == 'lflags'
+            tcsetattr_flags = termios.TCSAFLUSH
+            if hasattr(termios, 'TCSASOFT'):
+                tcsetattr_flags |= termios.TCSASOFT
+            try:
+                termios.tcsetattr(fd, tcsetattr_flags, new)
+                passwd = _raw_input(prompt, stream, input=input)
+            finally:
+                termios.tcsetattr(fd, tcsetattr_flags, old)
+                stream.flush()  # issue7208
+        except termios.error as e:
+            if passwd is not None:
+                # _raw_input succeeded.  The final tcsetattr failed.  Reraise
+                # instead of leaving the terminal in an unknown state.
+                raise
+            # We can't control the tty or stdin.  Give up and use normal IO.
+            # fallback_getpass() raises an appropriate warning.
+            del input, tty  # clean up unused file objects before blocking
+            passwd = fallback_getpass(prompt, stream)
+
+    stream.write('\n')
+    return passwd
+    
+def win_getNum(prompt='> ', choices=2, stream=None):
     """
     Select number choices using prompt, up to a max of choices.
 
     This isnt working correctly with large numbers but it's fine trust me. Just fix it later
 
+    :param stream: No idea.
     :param choices: How many choices
     :type choices: int
     :param prompt: What to prompt user with
@@ -73,7 +125,8 @@ def WinGetNum(prompt='> ', choices=2):
             if num:
                 break
         if c == '\003':
-            raise KeyboardInterrupt
+            break
+            # raise KeyboardInterrupt
         if c == '\b':
             if len(num) > 0:
                 num = num[:-1]
@@ -91,26 +144,84 @@ def WinGetNum(prompt='> ', choices=2):
         return int(num)
     except ValueError:
         return None
+        
+    
+def unix_getnum(prompt='> ', choices=2, stream=None):
+    fd = None
+    tty = None
+    try:
+        # Always try reading and writing directly on the tty first.
+        fd = os.open('/dev/tty', os.O_RDWR|os.O_NOCTTY)
+        tty = os.fdopen(fd, 'w+', 1)
+        input = tty
+        if not stream:
+            stream = tty
+    except EnvironmentError as e:
+        # If that fails, see if stdin can be controlled.
+        try:
+            fd = sys.stdin.fileno()
+        except:
+        	pass
+        input = sys.stdin
+        if not stream:
+            stream = sys.stderr
 
+    if fd is not None:
+        num = ""
+        try:
+            old = termios.tcgetattr(fd)     # a copy to save
+            new = old[:]
+            new[3] &= ~(termios.ECHO|termios.ISIG)  # 3 == 'lflags'
+            tcsetattr_flags = termios.TCSAFLUSH
+            if hasattr(termios, 'TCSASOFT'):
+                tcsetattr_flags |= termios.TCSASOFT
+            try:
+                termios.tcsetattr(fd, tcsetattr_flags, new)
+                num = _raw_input(prompt, stream, input=input)
+            finally:
+                termios.tcsetattr(fd, tcsetattr_flags, old)
+                stream.flush()  # issue7208
+        except termios.error as e:
+            if num is not None or num is not '':
+                # _raw_input succeeded.  The final tcsetattr failed.  Reraise
+                # instead of leaving the terminal in an unknown state.
+                raise
+            # We can't control the tty or stdin.  Give up and use normal IO.
+            # fallback_getpass() raises an appropriate warning.
+            del input, tty  # clean up unused file objects before blocking
+    stream.write('\n')
+    try:
+        return int(num)
+    except ValueError:
+        return None
 
-def WinPause():
+def win_pause():
     """
     Stops the program from exiting immediatly.
     """
     import msvcrt
-    for c in "\nPress any key to exit.":
+    for c in "Press any key to exit.":
         msvcrt.putwch(c)
-    while True:
+    while 1:
         c = msvcrt.getwch()
         if c:
             break
     msvcrt.putwch('\r')
     msvcrt.putwch('\n')
 
-
-def FallbackGetPass(prompt='Password: ', stream=None):
+def unix_pause():
+    try:
+        if system.platform == 'darwin':
+            os.system('sleep 1')
+        elif system.platform =='win32':
+            os.system('pause')  #windows, doesn't require enter
+        else:
+            os.system('read -p "Press any key to continue"') #linux 
+    except:
+        pass
+  		
+def fallback_getpass(prompt='Password: ', stream=None):
     """
-    Fallback in case the first try doesnt work for some reason.
 
     :param prompt: Prompt for user
     :param stream: No fucking idea
@@ -120,15 +231,15 @@ def FallbackGetPass(prompt='Password: ', stream=None):
     if not stream:
         stream = sys.stderr
     print("Warning: Password input may be echoed.", file=stream)
-    return _RawInput(prompt, stream)
+    return _raw_input(prompt, stream)
 
 
-def _RawInput(prompt="", stream=None, inputt=None):
+def _raw_input(prompt="", stream=None, input=None):
     # This doesn't save the string in the GNU readline history.
     if not stream:
         stream = sys.stderr
-    if not inputt:
-        inputt = sys.stdin
+    if not input:
+        input = sys.stdin
     prompt = str(prompt)
     if prompt:
         try:
@@ -140,7 +251,7 @@ def _RawInput(prompt="", stream=None, inputt=None):
             stream.write(prompt)
         stream.flush()
     # NOTE: The Python C API calls flockfile() (and unlock) during readline.
-    line = inputt.readline()
+    line = input.readline()
     if not line:
         raise EOFError
     if line[-1] == '\n':
@@ -148,7 +259,8 @@ def _RawInput(prompt="", stream=None, inputt=None):
     return line
 
 
-# Bind the name GetPass to the appropriate function
+# Bind the name getpass to the appropriate function
+
 try:
     import termios
     # it's possible there is an incompatible termios from the
@@ -159,10 +271,12 @@ except (ImportError, AttributeError):
         # noinspection PyUnresolvedReferences
         import msvcrt
     except ImportError:
-        GetPass = FallbackGetPass
+        getpass = fallback_getpass
     else:
-        GetPass = WinGetPass
-        GetNum = WinGetNum
-        Pause = WinPause
+        getpass = win_getpass
+        getnum = win_getNum
+        pause = win_pause
 else:
-    raise errors.UnsupportedError()
+    getpass = unix_getpass
+    getnum = unix_getnum
+    pause = unix_pause

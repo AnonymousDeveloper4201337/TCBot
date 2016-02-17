@@ -129,6 +129,6 @@ if getattr(sys, 'frozen', False):
     os.environ["REQUESTS_CA_BUNDLE"] = os.path.abspath(
         os.path.join(os.path.abspath(sys.argv[0]), os.pardir, "cacert.pem"))
 
-from .inputPass import GetNum, GetPass, Pause
+from .inputPass import getnum, getpass, pause
 from .general import GetValidation, Login, ListAccounts, LoadAccounts, WriteConfig, ReadConfig
 from .trade import GetSpread, GetCash, GetRate, IsTradeActive, GetBuxToTixEstimate, GetTixToBuxEstimate
