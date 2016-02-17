@@ -37,8 +37,7 @@ def WinGetPass(prompt='Password: ', stream=None):
         if c == '\r' or c == '\n':
             break
         if c == '\003':
-            break
-            # raise KeyboardInterrupt
+            raise KeyboardInterrupt
         if c == '\b':
             if len(pw) > 0:
                 pw = pw[:-1]
@@ -122,7 +121,7 @@ def WinGetNum(prompt='> ', choices=2, stream=None):
         if c == '\r' or c == '\n':
             if num:
                 break
-        if c == '\003:
+        if c == '\003':
             raise KeyboardInterrupt
         if c == '\b':
             if len(num) > 0:
