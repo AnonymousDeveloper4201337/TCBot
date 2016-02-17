@@ -207,9 +207,9 @@ def WinPause():
 
 def unix_pause():
     try:
-        if system.platform == 'darwin':
+        if sys.platform == 'darwin':
             os.system('sleep 1')
-        elif system.platform =='win32':
+        elif sys.platform =='win32':
             os.system('pause')  #windows, doesn't require enter
         else:
             os.system('read -p "Press any key to continue"') #linux 
