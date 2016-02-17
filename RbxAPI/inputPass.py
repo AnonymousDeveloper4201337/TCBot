@@ -16,7 +16,7 @@ import os
 
 from RbxAPI import errors
 
-__all__ = ["getpass", "getnum", "pause"]
+__all__ = ["GetPass", "GetNum", "Pause"]
 
 
 def WinGetPass(prompt='Password: ', stream=None):
@@ -216,7 +216,7 @@ def unix_pause():
     except:
         pass
   		
-def fallbackGetPass(prompt='Password: ', stream=None):
+def FallbackGetPass(prompt='Password: ', stream=None):
     """
 
     :param prompt: Prompt for user
