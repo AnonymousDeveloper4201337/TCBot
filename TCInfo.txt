@@ -1,6 +1,27 @@
-Thanks for installing the Roblox Trade Currency Bot, Made by Iaz3.
+README
 
-**DISCLAIMER**
-This product is provided AS IS and is not guaranteed to work.
-Roblox may change its web structure and/or services at any time which will cause said bot to break.
-I am not liable for any damages done to your computer or loss of account by use of this program.
+Thank you for installing my ROBLOX Trade Currency bot!
+
+This is currently version 3.0!
+
+!! WARNING !!
+This version WILL save your username and password to your computer(and ONLY your computer) for the purposes of
+logging in. This is done so the bot can run 24/7 without stopping, and that it can log into roblox again if it needs to.
+
+If you have any doubts about the trustworthiniess of this program, I enoucrage you to look at the source here on
+github, and make sure that nothing naferious is happening!
+You can find the link at the bottom of this readme.
+
+Be sure to keep your computer safe and secure!
+!! END WARNING !!
+
+
+Github link: https://github.com/iaz3/TCBot
+
+
+Major Changes of version 3.0:
+Improved Trading
+Improved Error Handling(So it can run 24/7 now)
+A Useful Debug Log, to make it easier to find and fix bugs
+Bug Fixes
+Improved UI

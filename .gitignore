@@ -3,7 +3,6 @@
 distutils.iss
 gui.py
 TCInfo.txt
-TCInfo.txt.bak
 test.py
 
 

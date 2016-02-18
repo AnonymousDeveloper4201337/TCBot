@@ -7,7 +7,7 @@ Created on May 20, 2014
 import msilib
 
 import requests
-from cx_Freeze import *
+from cx_Freeze import Executable, setup
 
 import Inno
 

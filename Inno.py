@@ -64,6 +64,15 @@ end;
 }
 
 
+class SafeDict(dict):
+    """
+    Handles proper string formatting with the Inno Setup constants
+    """
+
+    def __missing__(self, key):
+        return '{' + key + '}'
+
+
 def ModName(handle):
     """
     get module filename from HMODULE
@@ -166,7 +175,7 @@ class InnoScript(object):
         Sets some defaults
         """
         self.builder = builder  # The object that called this.
-        self.issfile = "distutils.iss"  # The file that will be created to hold the setup script. Overwritten.
+        self.SetupFile = "distutils.iss"  # The file that will be created to hold the setup script. Overwritten.
 
     def parse_iss(self, s):
         firstline = ''
@@ -268,7 +277,7 @@ class InnoScript(object):
             iss_metadata["SolidCompression"] = 'yes'
 
         # add InfoBeforeFile
-        for filename in ('README', 'README.txt', "README.MD"):
+        for filename in ('README', 'README.txt', "TCInfo.txt"):
             if os.path.isfile(filename):
                 iss_metadata['InfoBeforeFile'] = os.path.abspath(filename)
                 break
@@ -333,6 +342,7 @@ class InnoScript(object):
                     flags.append('uninsrestartdelete')
 
                 if filename.startswith(self.builder.DistDir):
+                    # Handles subdirs, sets them up relative to DistDir
                     place = os.path.dirname(filename)
             else:
                 # isdir
@@ -341,7 +351,8 @@ class InnoScript(object):
                     filename += '\\*'
                 flags.extend(self.default_dir_flags)
 
-            issline(fp, Source=filename, DestDir="{app}\\{0}".format(place, app="{app}"), Flags=' '.join(flags))
+            # issline(fp, Source=filename, DestDir="{app}\\{0}".format(place, app="{app}"), Flags=' '.join(flags))
+            issline(fp, Source=filename, DestDir="{app}\\{place}".format_map(SafeDict(place=place)))
             stored.add(filename)
 
         self.handle_iss(lines, fp)
@@ -358,6 +369,8 @@ class InnoScript(object):
             yield filename, relname
 
     def handle_iss_run(self, lines, fp):
+        issline(fp, Filename="{app}\\TCBot.exe", Description="Run TCBot", WorkingDir="{app}", Flags="nowait "
+                                                                                                    "postinstall")
         self.handle_iss(lines, fp)
 
     def handle_iss_uninstallrun(self, lines, fp):
@@ -372,6 +385,7 @@ class InnoScript(object):
             issline(fp, Name="{group}\\Uninstall %s" % self.metadata['name'], Filename="{uninstallexe}",
                     IconFilename="{app}\\TCIcon.ico", )
             issline(fp, Name="{group}\\TCBot", Filename="{app}\\TCBot.exe", IconFilename="{app}\\TCIcon.ico")
+            issline(fp, Name="{userdesktop}\\TCBot", Filename="{app}\\TCBot.exe", IconFilename="{app}\\TCIcon.ico")
             if self.builder.regist_startup:
                 issline(fp, Name="{commonstartup}\\%s" % self.metadata['name'], Filename="{app}\\%s" % 'TCBot.exe',
                         IconFilename="{app}\\TCIcon.ico")
@@ -394,7 +408,7 @@ class InnoScript(object):
         self.handle_iss(lines, fp)
         fp.write(DEFAULT_CODES.encode())
 
-    def create(self):
+    def Create(self):
         """
         Create Inno Installer script, which will be used to make the setup.exe
         """
@@ -404,7 +418,7 @@ class InnoScript(object):
         else:
             CustomInnoScript = self.builder.CustomInnoScript
 
-        with open(self.issfile, 'wb') as fp:
+        with open(self.SetupFile, 'wb') as fp:
             fp.write(codecs.BOM_UTF8)
             fp.write(b'; This file is created by distutils InnoSetup extension.\n')
 
@@ -412,14 +426,15 @@ class InnoScript(object):
             consts = self.iss_consts
             # FOFF
             consts.update({
-                'PYTHON_VERION': '%d.%d' % sys.version_info[:2],
-                'PYTHON_VER': '%d%d' % sys.version_info[:2],
+                'PYTHON_VERION': "{0}.{1}".format(*sys.version_info[:2]),
+                'PYTHON_VER': "{0}{1}".format(*sys.version_info[:2]),
                 'PYTHON_DIR': sys.prefix, 'PYTHON_DLL': ModName(sys.dllhandle),
             })
             # FON
             consts.update((k.upper(), v) for k, v in list(self.metadata.items()))
             for k in sorted(consts):
-                fp.write(('#define %s "%s"\n' % (k, consts[k],)).encode('utf_8'))
+                # fp.write(('#define %s "%s"\n' % (k, consts[k],)).encode('utf_8'))
+                fp.write(('#define {0} "{1}"\n'.format(k, consts[k], )).encode('utf_8'))
             fp.write(b'\n')
 
             # handle sections
@@ -441,7 +456,7 @@ class InnoScript(object):
                     fp.write(b'\n')
 
     def compile(self):
-        subprocess.call([self.innoexepath, '/cc', self.issfile])
+        subprocess.call([self.innoexepath, '/cc', self.SetupFile])
         # outputdir = self.iss_metadata.get('OutputDir', os.path.join(os.path.dirname(self.issfile), 'Output'))
         setupfile = os.path.abspath(
             os.path.join(self.builder.DistDir, self.iss_metadata.get('OutputBaseFilename', 'setup') + '.exe'))
@@ -490,5 +505,5 @@ class innosetup(build_exe):
         build_exe.run(self)
 
         script = InnoScript(self)
-        script.create()
+        script.Create()
         script.compile()

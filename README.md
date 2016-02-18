@@ -1,6 +1,6 @@
 # Roblox Trade Currency Bot #
 
-## UPCOMING UPDATE: 3.0 ##
+## UPDATE: 3.0 ##
 ### This update will have a massively improved trading algorithm, better error handling, and much much more! ###
 # !!WARNING!! #
 **THE NEW 3.0 UPDATE *WILL* SAVE YOUR USERNAME AND PASSWORD TO FILE(ONLY TO YOUR COMPUTER. IT IS NOT BEING SAVED ANYWHERE ELSE.) IF YOU DO NOT WANT THIS, CONTINUE USING 2.0**
@@ -16,17 +16,17 @@
 [FAQ/Troubleshooting](https://github.com/iaz3/TCBot/wiki/Troubleshooting)
 
 ### Downloads ###
-* [Download](https://github.com/iaz3/TCBot/wiki/Downloads)
+* Releases tab here on github.
 * Simply run the TCBot shortcut created on your desktop
 
 ### What is this repository for? ###
 
 * The ROBLOX Trade Currency Bot, created by iaz3(Diana Land)
-* Version 2.0.2
+* Version 3.0
 
 ### How do I get set up? ###
 
-* Download and install TCBot from [here](https://github.com/iaz3/TCBot/wiki/Downloads)
+* Download and install TCBot the releases tab.
 
 > A shortcut will be created on the desktop, running it will start the program.
 > NOTE: You only need the below Dependencies if you are NOT using the EXE
@@ -51,9 +51,9 @@ Beautifulsoup 4, and colorama.
 
 * Diana.
 
-> * Iaz3 on ROBLOX.
+> * ROBLOX: Iaz3
 > * Email: crazykilla15@gmail.com
-> * Twitter: @Hugs4Diana
+> * Twitter: [@Hugs4Diana](https://www.twitter.com/Hugs4Diana)
 
 * Other community or team contact
 
