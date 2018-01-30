@@ -47,14 +47,6 @@ Beautifulsoup 4, and colorama.
 * Other guidelines: Unix newlines.
 * Read the build instructions found [here](https://github.com/iaz3/TCBot/wiki/Building)
 
-### Who do I talk to? ###
-
-* Diana.
-
-> * ROBLOX: Iaz3
-> * Email: crazykilla15@gmail.com
-> * Twitter: [@Hugs4Diana](https://www.twitter.com/Hugs4Diana)
-
 * Other community or team contact
 
 ### More Info ###
